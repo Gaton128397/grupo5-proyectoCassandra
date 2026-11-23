@@ -1,0 +1,69 @@
+# Cluster Cassandra de 3 nodos (1 datacenter, 3 racks), análogo al anillo del informe anterior.
+# Para un solo nodo (mínimo exigido en la Etapa 1):  docker compose up -d cass1
+name: cassandra-manufactura
+
+x-cassandra: &cassandra
+  image: cassandra:5.0
+  restart: unless-stopped
+  environment: &env
+    CASSANDRA_CLUSTER_NAME: anillo_manufactura
+    CASSANDRA_DC: datacenter_manufactura
+    CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+    CASSANDRA_SEEDS: cass1
+    MAX_HEAP_SIZE: 512M
+    HEAP_NEWSIZE: 128M
+  networks: [anillo]
+  healthcheck:
+    test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' >/dev/null 2>&1"]
+    interval: 15s
+    timeout: 10s
+    retries: 20
+    start_period: 60s
+
+services:
+  cass1:
+    <<: *cassandra
+    container_name: cass1
+    hostname: cass1
+    environment:
+      <<: *env
+      CASSANDRA_RACK: rack1
+    ports:
+      - "9042:9042"
+    volumes:
+      - cass1_data:/var/lib/cassandra
+      - ./schema.cql:/etc/cassandra-lab/schema.cql:ro
+      - ./operaciones.cql:/etc/cassandra-lab/operaciones.cql:ro
+      - ./datos:/datos
+
+  cass2:
+    <<: *cassandra
+    container_name: cass2
+    hostname: cass2
+    environment:
+      <<: *env
+      CASSANDRA_RACK: rack2
+    volumes:
+      - cass2_data:/var/lib/cassandra
+    depends_on:
+      cass1: {condition: service_healthy}
+
+  cass3:
+    <<: *cassandra
+    container_name: cass3
+    hostname: cass3
+    environment:
+      <<: *env
+      CASSANDRA_RACK: rack3
+    volumes:
+      - cass3_data:/var/lib/cassandra
+    depends_on:
+      cass2: {condition: service_healthy}
+
+networks:
+  anillo:
+
+volumes:
+  cass1_data:
+  cass2_data:
+  cass3_data:

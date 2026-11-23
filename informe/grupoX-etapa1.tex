@@ -1,0 +1,358 @@
+\documentclass[12pt]{article}
+\usepackage[spanish]{babel}
+\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{textpos}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\setlength{\headheight}{2.4cm}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\includegraphics[height=1.8cm]{head.png}}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray},
+    stringstyle=\color{orange},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    breaklines=true,
+    showstringspaces=false
+}
+\newcommand{\cmd}[1]{\colorbox{gray!20}{\texttt{#1}}}
+\newcommand{\nota}[1]{\textit{\textcolor{gray}{#1}}}
+\newcommand{\imagen}[3]{%
+  \begin{figure}[H]
+    \centering
+    {\setlength{\fboxrule}{1pt}\setlength{\fboxsep}{4pt}%
+     \fcolorbox{black!60}{white}{%
+       \setlength{\fboxrule}{0.5pt}\setlength{\fboxsep}{8pt}%
+       \fcolorbox{black!35}{white}{\includegraphics[width=#2\textwidth]{#1}}}}
+    \caption{#3}
+    \label{fig:#1}
+  \end{figure}
+}
+
+\begin{document}
+
+% Portada
+\thispagestyle{empty}
+
+\begin{tikzpicture}[remember picture, overlay]
+    % Logo y información de la universidad en la parte superior
+    \node[anchor=north west] at (current page.north west) {%
+        \begin{minipage}{\textwidth}
+            \vspace{1cm}
+            \hspace{0.5cm}
+            \begin{minipage}{2.5cm}
+                \includegraphics[width=2.5cm]{Utalca.png}
+            \end{minipage}
+            \hspace{0.5cm}
+            \begin{minipage}{10cm}
+                \raggedright
+                {\small\textbf{UNIVERSIDAD DE TALCA}} \\
+                {\small\textbf{FACULTAD DE INGENIERÍA}} \\
+                {\small\textbf{DEPARTAMENTO DE CIENCIAS DE LA COMPUTACIÓN}}
+            \end{minipage}
+        \end{minipage}
+    };
+    
+    % Información en la parte inferior derecha
+    \node[anchor=south west] at ([xshift=2cm, yshift=1cm]current page.south west) {%
+        \begin{tabular}{@{}ll@{}}
+            \textbf{Fecha:}  & 11/11/2026 \\[0.3cm]
+            \textbf{Autores:}   & Gaston Villanueva \\
+                                & Nicolas Salas \\
+                                & Krisstal  Hernandez \\[0.3cm]    
+            \textbf{e-mail:} & \texttt{gvillanueva19@alumnos.utalca.cl} \\ 
+                            &  \texttt{nsalas21@alumnos.utalca.cl} \\
+                            & \texttt{khernandez22@alumnos.utalca.cl} \\ [0.3cm]
+            \textbf{Profesor:} & Renzo Angles \\[0.3cm]
+        \end{tabular}
+    };
+\end{tikzpicture}
+
+% Espacio en blanco
+\vspace*{4cm}
+
+% Título y subtítulo centrados
+\begin{center}
+    \vspace*{2cm}
+    
+    {\huge\textbf{Informe Proyecto Grupal de Unidad }}
+
+    {\vspace{1cm}}
+
+    {\Large\textbf{Grupo 5}}
+    
+    {\vspace{1cm}}
+    
+    {\Large Módulo de EXTRACCION Y GESTION DE DATOS MASIVOS}
+
+    {\vspace{1cm}}
+
+    {\Large Etapa 1}
+    
+\end{center}
+
+\newpage
+%\input{indice}
+%\input{indice.tex}
+%\input{introduccion}
+%\input{validacionRut}
+%\input{triggers}
+%\input{procedimientosAlmacenados}
+%\input{vistas}
+%\input{reglasAvanzadas}
+%\input{resultadosPruebas.tex}
+%\input{conclusion}
+
+\newpage
+% ============================================================
+\section{Propuesta}
+\subsection{Herramienta elegida.}
+\subsubsection*{Apache Cassandra} La herramienta corresponde a una base de datos NoSQL distribuida de tipo
+\textit{wide-column}, sin nodo maestro (arquitectura \textit{peer-to-peer}), con replicación configurable
+y consistencia ajustable por consulta. 
+
+
+\subsection{¿Por qué se eligió esta base de datos?}
+\begin{itemize}\itemsep0pt
+  \item \textbf{Encaja con el tipo de dato:} las lecturas de sensores son series de tiempo de alta tasa de
+        escritura, el caso de uso para el que Cassandra está diseñada (escritura mediante \textit{commit log},
+        \textit{memtable} y \textit{SSTable}).
+  \item \textbf{Complementa el ecosistema visto:} a diferencia de HDFS/Hive, que están orientados a lotes y
+        análisis, Cassandra atiende lecturas y escrituras de baja latencia por clave y no tiene punto único de falla.
+  \item \textbf{Operable localmente:} se instala con Docker Compose; el clúster de 3 nodos levantó y operó
+        sin problemas en el equipo del grupo.
+  \item \textbf{Permite experimentos claros para la Etapa 3:} consistencia (\texttt{ONE} vs.\ \texttt{QUORUM}),
+        tolerancia a fallos al detener nodos y escalabilidad al variar el número de nodos.
+\end{itemize}
+
+\subsection{Dataset tentativo: Smart Manufacturing IoT-Cloud Monitoring Dataset}
+\noindent
+\textbf{Fuente:} Kaggle \\
+\textbf{Autor:} \texttt{ziya07} \\
+\textbf{Tipo de dominio:} Público \\
+\textbf{Volumen:} 100\,000 lecturas (1 por minuto) \\
+\textbf{Máquinas:} 50 máquinas industriales \\
+\textbf{Periodo:} 1 de enero -- 11 de marzo de 2025 \\
+\textbf{Variables:} 13 columnas (temperatura, vibración, humedad, presión, consumo de energía, estado de la máquina, indicador de anomalía, vida remanente estimada, tipo de falla, riesgo de caída y mantención requerida).
+
+\vspace{0.6em}
+Este dataset está orientado al \textbf{mantenimiento predictivo} y a la \textbf{detección de anomalías}. 
+Dado que el autor no precisa su procedencia, el grupo lo trata como un conjunto de datos de sensores 
+industriales, sin afirmar que provenga de una planta real. Para la Etapa 3, el volumen puede ampliarse 
+replicando el conjunto sobre un mayor número de máquinas y un horizonte temporal más extenso.
+\subsection{Herramientas probadas y descartadas.}
+\textbf{Ninguna}. Se eligió como primera opción Cassandra y las
+pruebas básicas resultaron sin necesidad de evaluar otra herramienta; por eso no se declaran alternativas
+descartadas.
+\newpage
+\section{Pruebas básicas}
+\subsection{Modelo de datos (\texttt{schema.cql})}
+A continuación se mostrará de manera visual el esquema del Keyspace \cmd{manufactura\_iot} con \cmd{NetworkTopologyStrategy} y factor de replicación 3.
+Se usa una tabla por consulta; el campo \texttt{mes} acota el tamaño de cada partición.
+
+\begin{figure}[h!]
+\centering
+\newcommand{\cqltable}[4]{% x, y, titulo, filas
+  \node[anchor=north west, fill=black!75, text=white, minimum width=10.5cm, minimum height=0.7cm,
+        font=\bfseries\small\ttfamily, draw=black] at (#1,#2) {#3};
+  \foreach \n/\t/\k [count=\i] in {#4} {
+    \pgfmathsetmacro{\yy}{#2-0.7-(\i-1)*0.5}
+    \if\k P\def\fillc{blue!20}\def\kt{PK}\else
+      \if\k C\def\fillc{orange!30}\def\kt{CK}\else\def\fillc{white}\def\kt{}\fi\fi
+    \node[anchor=north west, draw, fill=\fillc, minimum width=5.5cm, minimum height=0.5cm,
+          font=\footnotesize\ttfamily, align=left, inner sep=4pt] at (#1,\yy) {\n};
+    \node[anchor=north west, draw, fill=\fillc, minimum width=3cm, minimum height=0.5cm,
+          font=\footnotesize\ttfamily] at (#1+5.5,\yy) {\t};
+    \node[anchor=north west, draw, fill=\fillc, minimum width=2cm, minimum height=0.5cm,
+          font=\footnotesize\bfseries] at (#1+8.5,\yy) {\kt};
+  }
+}
+\begin{tikzpicture}[x=1cm,y=1cm]
+% Tabla 1
+\cqltable{0}{0}{lecturas\_por\_maquina}{%
+  machine\_id/int/P, mes/text/P, ts/timestamp/C, temperature/float/N, vibration/float/N,
+  humidity/float/N, pressure/float/N, energy\_consumption/float/N, machine\_status/int/N,
+  anomaly\_flag/int/N, predicted\_remaining\_life/int/N, failure\_type/text/N,
+  downtime\_risk/float/N, maintenance\_required/int/N}
+\node[anchor=north west, font=\scriptsize] at (0,-7.9) {\texttt{PRIMARY KEY ((machine\_id, mes), ts)} \quad \texttt{CLUSTERING ORDER BY (ts DESC)}};
+% Flecha
+\draw[-{Stealth[length=3mm]}, thick] (5.25,-8.4) -- node[right, font=\scriptsize, align=left]{\ desnormalización: solo lecturas con falla} (5.25,-9.4);
+% Tabla 2
+\cqltable{0}{-9.5}{anomalias\_por\_tipo}{%
+  failure\_type/text/P, mes/text/P, ts/timestamp/C, machine\_id/int/C, temperature/float/N,
+  vibration/float/N, pressure/float/N, anomaly\_flag/int/N, predicted\_remaining\_life/int/N,
+  downtime\_risk/float/N}
+\node[anchor=north west, font=\scriptsize] at (0,-15.7) {\texttt{PRIMARY KEY ((failure\_type, mes), ts, machine\_id)} \quad \texttt{ORDER BY (ts DESC, machine\_id ASC)}};
+% Leyenda
+\node[draw, fill=blue!20, minimum width=0.5cm, minimum height=0.35cm] at (0.4,-16.7) {};
+\node[anchor=west, font=\scriptsize] at (0.8,-16.7) {Clave de partición};
+\node[draw, fill=orange!30, minimum width=0.5cm, minimum height=0.35cm] at (4.2,-16.7) {};
+\node[anchor=west, font=\scriptsize] at (4.6,-16.7) {Clave de clustering};
+\node[draw, fill=white, minimum width=0.5cm, minimum height=0.35cm] at (8,-16.7) {};
+\node[anchor=west, font=\scriptsize] at (8.4,-16.7) {Columna regular};
+\end{tikzpicture}
+\caption{Esquema de las tablas de Cassandra en el keyspace \texttt{manufactura\_iot}.}
+\end{figure}
+
+\newpage
+\subsection{Instalación reproducible}
+El clúster se define en un único archivo \cmd{docker-compose.yml}: tres nodos \texttt{cassandra:5.0}
+(\texttt{cass1}, \texttt{cass2}, \texttt{cass3}) en un mismo datacenter y tres \textit{racks}, con
+\cmd{GossipingPropertyFileSnitch} y \cmd{heap} de \cmd{512\,MB} por nodo. Los nodos arrancan en cadena
+(\cmd{depends\_on} con \cmd{healthcheck}), de modo que cada uno se une al anillo cuando el anterior
+está listo. Todo se levanta con un comando:
+
+\begin{lstlisting}[language=bash]
+docker compose up -d #referirse al archivo docker-compose.yml para ver su contenido
+\end{lstlisting}
+\subsubsection{Verificación del anillo} Asi con \cmd{nodetool status}: los tres nodos aparecen en estado \cmd{UN}
+(\cmd{Up/Normal}), cada uno en su \textit{rack} y con 100\,\% de propiedad efectiva, coherente con un
+factor de replicación 3 sobre 3 nodos.
+
+\begin{lstlisting}
+$ docker exec cass1 nodetool status
+--  Address     Load        Tokens  Owns (effective)  Rack
+UN  172.20.0.3  85.1 KiB    16      100.0%            rack2
+UN  172.20.0.2  3.55 MiB    16      100.0%            rack1
+UN  172.20.0.4  119.69 KiB  16      100.0%            rack3
+\end{lstlisting}
+
+\subsection{Carga del dataset}
+
+
+\subsubsection{Preparación.} El CSV original (\cmd{smart\_manufacturing\_data.csv}, 100\,000 filas) se
+transforma con \cmd{preparar\_datos.py}: se renombra \texttt{timestamp} a \texttt{ts} (palabra clave de
+CQL) y se agrega la columna \texttt{mes}, que se usa como parte de la clave de partición. El script genera
+\cmd{lecturas.csv} (100\,000 filas) y \cmd{anomalias.csv} (8\,101 filas con falla).
+
+\subsection{Modelo de datos}
+\subsubsection{Se diseñó una tabla por consulta:}
+Se diseñó una tabla por cada tipo de consulta, optimizando el acceso según el patrón de uso:
+
+\begin{itemize}\itemsep0.4em
+  \item \textbf{\texttt{lecturas\_por\_maquina}}  
+  Clave primaria: \texttt{((machine\_id, mes), ts)}  
+  Consulta principal: obtener las lecturas de una máquina en un mes determinado, ordenadas de la más reciente a la más antigua.  
+  Se particiona por mes para mantener un tamaño de partición acotado (máximo 981 filas en este dataset).
+
+  \item \textbf{\texttt{anomalias\_por\_tipo}}  
+  Clave primaria: \texttt{((failure\_type, mes), ts, machine\_id)}  
+  Consulta principal: recuperar todas las fallas de un tipo específico ocurridas en un mes, provenientes de cualquier máquina.
+\end{itemize}
+
+\nota{El esquema completo se encuentra definido en el archivo \texttt{schema.cql}.}
+
+\newpage
+\subsection{Carga}
+Los datos se cargaron mediante el comando \texttt{COPY} de \texttt{cqlsh}, utilizando nivel de consistencia \texttt{QUORUM}:
+
+\begin{lstlisting}[language=bash,caption={Comandos de carga}]
+CONSISTENCY QUORUM;
+
+COPY manufactura_iot.lecturas_por_maquina 
+  (machine_id, mes, ts, temperature, vibration, humidity, pressure, 
+   energy_consumption, machine_status, anomaly_flag, 
+   predicted_remaining_life, failure_type, downtime_risk, 
+   maintenance_required) 
+FROM '/datos/lecturas.csv' WITH HEADER = true;
+
+COPY manufactura_iot.anomalias_por_tipo 
+  (failure_type, mes, ts, machine_id, temperature, vibration, 
+   pressure, anomaly_flag, predicted_remaining_life, downtime_risk) 
+FROM '/datos/anomalias.csv' WITH HEADER = true;
+\end{lstlisting}
+
+Posteriormente, se verificó la correcta inserción de los datos:
+
+\begin{lstlisting}
+cqlsh> SELECT count(*) FROM manufactura_iot.lecturas_por_maquina;
+ count
+--------
+ 100000
+
+cqlsh> SELECT count(*) FROM manufactura_iot.anomalias_por_tipo;
+ count
+-------
+   8101
+\end{lstlisting}
+{\vspace{1cm}}
+Ambos conteos coinciden con el número de filas de los archivos de origen. \par
+{\vspace{1cm}}
+\nota{\texttt{cqlsh} advierte que la agregación \texttt{count(*)} se realizó sin \textit{partition key}. 
+Esta advertencia es aceptable en este contexto, ya que se trata únicamente de una verificación puntual.}
+\newpage
+
+\subsection{Operaciones representativas}
+Las tres operaciones se ejecutan con \cmd{operaciones.cql}, con consistencia \texttt{QUORUM}:
+\begin{lstlisting}[language=bash]
+docker exec -it cass1 cqlsh -f /etc/cassandra-lab/operaciones.cql
+\end{lstlisting}
+\subsubsection{Escribir}
+Inserción de una nueva lectura de la máquina 15 en ambas tablas (una por consulta):
+\begin{lstlisting}[language=SQL]
+INSERT INTO lecturas_por_maquina (machine_id, mes, ts, temperature, vibration, humidity, pressure,
+  energy_consumption, machine_status, anomaly_flag, predicted_remaining_life, failure_type,
+  downtime_risk, maintenance_required)
+VALUES (15, '2025-03', '2025-03-11 10:40:00+0000', 99.5, 45.0, 50.0, 3.0, 4.2, 2, 1, 12,
+  'Overheating', 1.0, 1);
+INSERT INTO anomalias_por_tipo (failure_type, mes, ts, machine_id, temperature, vibration, pressure,
+  anomaly_flag, predicted_remaining_life, downtime_risk)
+VALUES ('Overheating', '2025-03', '2025-03-11 10:40:00+0000', 15, 99.5, 45.0, 3.0, 1, 12, 1.0);
+\end{lstlisting}
+
+\noindent \texttt{cqlsh} no imprime salida cuando una escritura se completa; la verificación está en la consulta siguiente, donde la fila
+insertada (10:40) aparece en ambas tablas.
+
+\subsubsection{Consultar}
+Últimas cinco lecturas de la máquina 15 en marzo, y últimas cinco fallas por sobrecalentamiento del mes.
+Ambas consultas filtran por la clave de partición completa, por lo que Cassandra lee una sola partición y
+los datos ya están ordenados por \texttt{ts} descendente:
+
+\begin{lstlisting}[language=SQL]
+SELECT ts, temperature, vibration, pressure, failure_type FROM lecturas_por_maquina
+WHERE machine_id = 15 AND mes = '2025-03' LIMIT 5;
+
+SELECT ts, machine_id, temperature, predicted_remaining_life FROM anomalias_por_tipo
+WHERE failure_type = 'Overheating' AND mes = '2025-03' LIMIT 5;
+\end{lstlisting}
+\newpage
+\subsection{Salidas de la terminal}
+\imagen{imagenesCapturasEvidencias/captura_terminal.png}{0.85}{Ejecución del archivo \texttt{operaciones.cql} mostrando las últimas lecturas de la máquina 15.}
+\imagen{imagenesCapturasEvidencias/captura_terminal2.png}{0.85}{Ejecución del archivo \texttt{operaciones.cql}}\par
+La fila insertada en la operación anterior aparece primera en ambas consultas, lo que confirma que la
+escritura quedó replicada con \texttt{QUORUM} y que el orden descendente por \texttt{ts} se resuelve
+directamente desde la partición.
+
+\newpage
+\subsection{Agregar}
+Resumen de la máquina 15 en febrero con funciones de agregación nativas, y conteo de fallas por vibración:
+\begin{lstlisting}[language=SQL]
+SELECT count(*) AS lecturas, avg(temperature) AS temp_prom, max(vibration) AS vib_max,
+       sum(anomaly_flag) AS anomalias, min(predicted_remaining_life) AS vida_min
+FROM lecturas_por_maquina WHERE machine_id = 15 AND mes = '2025-02';
+
+SELECT count(*) AS fallas_vibracion FROM anomalias_por_tipo
+WHERE failure_type = 'Vibration Issue' AND mes = '2025-02';
+\end{lstlisting}
+\imagen{imagenesCapturasEvidencias/conteoVib.png}{0.85}{Salida de terminal con las vibraciones \texttt{operaciones.cql}}\par
+\imagen{imagenesCapturasEvidencias/fallasVib.png}{0.2}{Fallas de vibraciones \texttt{operaciones.cql}}\par
+
+La máquina 15 registró 775 lecturas en febrero, con 68 marcadas como anomalía, y en el mismo mes hubo 1\,239
+fallas por vibración en el conjunto de las 50 máquinas.
+
+
+
+\end{document}
