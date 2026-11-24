@@ -1,0 +1,116 @@
+******************** Stress Settings ********************
+Command:
+  Type: write
+  Count: 50,000
+  No Warmup: false
+  Consistency Level: ONE
+  Serial Consistency Level: SERIAL
+  Target Uncertainty: not applicable
+  Key Size (bytes): 10
+  Counter Increment Distibution: add=fixed(1)
+Rate:
+  Auto: false
+  Thread Count: 50
+  OpsPer Sec: 0
+Population:
+  Sequence: 1..50000
+  Order: ARBITRARY
+  Wrap: true
+Insert:
+  Revisits: Uniform:  min=1,max=1000000
+  Visits: Fixed:  key=1
+  Row Population Ratio: Ratio: divisor=1.000000;delegate=Fixed:  key=1
+  Batch Type: not batching
+Columns:
+  Max Columns Per Key: 5
+  Column Names: [C0, C1, C2, C3, C4]
+  Timestamp: null
+  Variable Column Count: false
+  Slice: false
+  Size Distribution: Fixed:  key=34
+  Count Distribution: Fixed:  key=5
+Errors:
+  Ignore: false
+  Fail fast setting: false
+  Tries: 10
+Log:
+  No Summary: false
+  No Settings: false
+  File: /resultados/STRESS-R2-ONE.log
+  Interval Millis: 1000
+  Level: NORMAL
+Mode:
+  API: JAVA_DRIVER_NATIVE
+  Connection Style: CQL_PREPARED
+  CQL Version: CQL3
+  Protocol Version: DEFAULT
+  Username: null
+  Password: null
+  Auth Provide Class: null
+  Max Pending Per Connection: null
+  Connections Per Host: 8
+  Request Timeout: 12000 ms
+  Compression: NONE
+  Idempotent Statements: false
+  Speculative Execution: none
+Node:
+  Nodes: [localhost]
+  Is White List: false
+  Datacenter: null
+  Rack: null
+  Load Balance: auto
+  Remote DC Hosts: disabled
+Schema:
+  Keyspace: keyspace1
+  Replication Strategy: org.apache.cassandra.locator.NetworkTopologyStrategy
+  Replication Strategy Options: {replication_factor=3}
+  Storage Options: {}
+  Table Compression: null
+  Table Compaction Strategy: null
+  Table Compaction Strategy Options: {}
+Transport:
+  truststore=null; truststore-password=null; keystore=null; keystore-password=null; ssl-protocol=TLS; ssl-alg=SunX509; store-type=JKS; ssl-ciphers=TLS_AES_256_GCM_SHA384,TLS_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256; hostname-verification=true; 
+Port:
+  Native Port: 9042
+Send To Daemon:
+  *not set*
+Graph:
+  File: null
+  Revision: unknown
+  Title: cassandra-stress - 2026-11-24 03:59:17
+  Operation: WRITE
+TokenRange:
+  Wrap: false
+  Split Factor: 1
+
+Connected to cluster: anillo_manufactura, max pending requests per connection null, max connections per host 8
+Datatacenter: datacenter_manufactura; Host: localhost/127.0.0.1:9042; Rack: rack1
+Datatacenter: datacenter_manufactura; Host: /172.18.0.4:9042; Rack: rack3
+Datatacenter: datacenter_manufactura; Host: /172.18.0.3:9042; Rack: rack2
+Created keyspaces. Sleeping 1s for propagation.
+Sleeping 2s...
+Warming up WRITE with 12500 iterations...
+Running WRITE with 50 threads for 50000 iteration
+type       total ops,    op/s,    pk/s,   row/s,    mean,     med,     .95,     .99,    .999,     max,   time,   stderr, errors
+total,          3956,    3956,    3956,    3956,     2.5,     2.0,     6.6,     9.8,    15.6,    22.4,    1.0,  0.00000,      0
+total,         17341,   13385,   13385,   13385,     3.7,     2.6,     9.8,    18.9,    49.5,    72.6,    2.0,  0.39742,      0
+total,         30035,   12694,   12694,   12694,     3.8,     2.5,     9.1,    17.5,   140.6,   221.4,    3.0,  0.26846,      0
+total,         48004,   17969,   17969,   17969,     2.8,     1.8,     5.3,     9.9,   146.7,   307.8,    4.0,  0.25607,      0
+total,         50000,   19455,   19455,   19455,     2.5,     2.1,     5.8,     8.9,    11.3,    11.8,    4.1,  0.20188,      0
+
+
+Results:
+Op rate                   :   12,187 op/s  [WRITE: 12,187 op/s]
+Partition rate            :   12,187 pk/s  [WRITE: 12,187 pk/s]
+Row rate                  :   12,187 row/s [WRITE: 12,187 row/s]
+Latency mean              :    3.2 ms [WRITE: 3.2 ms]
+Latency median            :    2.2 ms [WRITE: 2.2 ms]
+Latency 95th percentile   :    7.9 ms [WRITE: 7.9 ms]
+Latency 99th percentile   :   15.7 ms [WRITE: 15.7 ms]
+Latency 99.9th percentile :  101.2 ms [WRITE: 101.2 ms]
+Latency max               :  307.8 ms [WRITE: 307.8 ms]
+Total partitions          :     50,000 [WRITE: 50,000]
+Total errors              :          0 [WRITE: 0]
+Total operation time      : 00:00:04
+
+END
