@@ -1,0 +1,65 @@
+﻿name: cassandra-escalabilidad
+
+x-cassandra: &cassandra
+  image: cassandra:5.0
+  restart: "no"
+  environment: &env
+    CASSANDRA_CLUSTER_NAME: anillo_escalabilidad
+    CASSANDRA_DC: datacenter_escalabilidad
+    CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+    CASSANDRA_SEEDS: esc1
+    MAX_HEAP_SIZE: 512M
+    HEAP_NEWSIZE: 128M
+  networks: [anillo_escalabilidad]
+  stop_grace_period: 60s
+  healthcheck:
+    test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' >/dev/null 2>&1"]
+    interval: 15s
+    timeout: 10s
+    retries: 20
+    start_period: 60s
+
+services:
+  esc1:
+    <<: *cassandra
+    container_name: esc1
+    hostname: esc1
+    environment:
+      <<: *env
+      CASSANDRA_RACK: rack1
+    volumes:
+      - esc1_data:/var/lib/cassandra
+
+  esc2:
+    <<: *cassandra
+    container_name: esc2
+    hostname: esc2
+    environment:
+      <<: *env
+      CASSANDRA_RACK: rack2
+    volumes:
+      - esc2_data:/var/lib/cassandra
+    depends_on:
+      esc1:
+        condition: service_healthy
+
+  esc3:
+    <<: *cassandra
+    container_name: esc3
+    hostname: esc3
+    environment:
+      <<: *env
+      CASSANDRA_RACK: rack3
+    volumes:
+      - esc3_data:/var/lib/cassandra
+    depends_on:
+      esc2:
+        condition: service_healthy
+
+networks:
+  anillo_escalabilidad:
+
+volumes:
+  esc1_data:
+  esc2_data:
+  esc3_data:
